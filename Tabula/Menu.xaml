@@ -1,0 +1,26 @@
+﻿<Window x:Class="Tabula.Menu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tabula"
+        mc:Ignorable="d"
+        Title="Menu" Height="300" Width="320.301">
+    <Grid>
+        <ComboBox x:Name="stanice" HorizontalAlignment="Left" Height="27" Margin="110,10,0,0" VerticalAlignment="Top" Width="174" Loaded="stanice_Loaded" SelectedIndex="0" LostFocus="stanice_LostFocus">
+            <ListBoxItem Content="None" IsEnabled="False" Width="42"/>
+        </ComboBox>
+        <Label x:Name="label" Content="Stanice:" HorizontalAlignment="Left" Height="27" Margin="0,10,0,0" VerticalAlignment="Top" Width="63"/>
+        <ComboBox x:Name="vlak" HorizontalAlignment="Left" Height="27" Margin="110,42,0,0" VerticalAlignment="Top" Width="174" Loaded="vlak_loaded" SelectedIndex="0" LostFocus="vlak_LostFocus">
+            <ListBoxItem Content="None" IsEnabled="False" Width="42"/>
+        </ComboBox>
+        <Label x:Name="label_Copy" Content="Vlak:" HorizontalAlignment="Left" Height="27" Margin="0,40,0,0" VerticalAlignment="Top" Width="63"/>
+        <Button x:Name="ukaz" Content="Zobraz" HorizontalAlignment="Left" Height="41" Margin="162,138,0,0" VerticalAlignment="Top" Width="122" Click="ukaz_Click"/>
+        <TextBox x:Name="nastupiste" HorizontalAlignment="Left" Height="27" Margin="252,74,0,0" Text="TextBox" VerticalAlignment="Top" Width="32" Loaded="nastupiste_Loaded" LostFocus="nastupiste_LostFocus"/>
+        <TextBox x:Name="kolej" HorizontalAlignment="Left" Height="27" Margin="215,74,0,0" Text="TextBox" VerticalAlignment="Top" Width="32" Loaded="kolej_Loaded" LostFocus="kolej_LostFocus"/>
+        <Label x:Name="label_Copy1" Content="Kolej a nástupiště:" HorizontalAlignment="Left" Height="27" Margin="0,74,0,0" VerticalAlignment="Top" Width="114"/>
+        <TextBox x:Name="spozdeni" HorizontalAlignment="Left" Height="27" Margin="252,106,0,0" Text="TextBox" VerticalAlignment="Top" Width="32" Loaded="spozdeni_Loaded" LostFocus="spozdeni_LostFocus"/>
+        <Label x:Name="label_Copy2" Content="Zpoždění:" HorizontalAlignment="Left" Height="27" Margin="0,106,0,0" VerticalAlignment="Top" Width="114"/>
+        <Label Margin="0,200,0,0" VerticalAlignment="Bottom" Content="Last edit 2017, Build 2019, Copyright Richard Torhan"></Label>
+    </Grid>
+</Window>
