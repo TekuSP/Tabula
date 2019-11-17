@@ -11,8 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Tabula.Windows.Screen;
 
-namespace Tabula
+namespace Tabula.Windows.Configurator
 {
     /// <summary>
     /// Interaction logic for Menu.xaml

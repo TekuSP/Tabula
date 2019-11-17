@@ -8,8 +8,10 @@ using System.Windows.Controls;
 using System.IO.Compression;
 using System.Collections.Generic;
 using System.Text;
+using Tabula.Audio;
+using Tabula.Enums;
 
-namespace Tabula
+namespace Tabula.Windows.Screen
 {
     public partial class MainWindow : Window
     {
@@ -42,7 +44,7 @@ namespace Tabula
             }
             #endregion
             //zjisteni = SortAndTellClosestToTime(nacist());
-            new Menu().Show();
+            new Configurator.Menu().Show();
             //tabule = new NadrazniTabule(typ, pres, cil, hodiny, odjezd, spozdeni, cislo, svitidlo, zjisteni);
             //new System.Threading.Thread(asyncZjistovani).Start();
             this.Close();
@@ -110,8 +112,8 @@ namespace Tabula
             sr = new StreamReader(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.tabula/test.vlk");
             Vlak[] docasny = new Vlak[pocetRadku];
             Queue<string> system = new Queue<string>();
-            znak mark = znak.Os;
-            spolecnost firma = spolecnost.CD;
+            TrainType mark = TrainType.Os;
+            Company firma = Company.CD;
             pocetRadku = 0;
             while (!sr.EndOfStream)
             {
@@ -129,13 +131,13 @@ namespace Tabula
                 switch (temp)
                 {
                     case "CD":
-                        firma = spolecnost.CD;
+                        firma = Company.CD;
                         break;
                     case "LE":
-                        firma = spolecnost.LE;
+                        firma = Company.LE;
                         break;
                     case "RJ":
-                        firma = spolecnost.RJ;
+                        firma = Company.RJ;
                         break;
                 }
                 #endregion
@@ -145,40 +147,40 @@ namespace Tabula
                 switch (temp)
                 {
                     case "Os":
-                        mark = znak.Os;
+                        mark = TrainType.Os;
                         break;
                     case "Sp":
-                        mark = znak.Sp;
+                        mark = TrainType.Sp;
                         break;
                     case "R":
-                        mark = znak.R;
+                        mark = TrainType.R;
                         break;
                     case "Ex":
-                        mark = znak.Ex;
+                        mark = TrainType.Ex;
                         break;
                     case "IC":
-                        mark = znak.IC;
+                        mark = TrainType.IC;
                         break;
                     case "EC":
-                        mark = znak.EC;
+                        mark = TrainType.EC;
                         break;
                     case "SC":
-                        mark = znak.SC;
+                        mark = TrainType.SC;
                         break;
                     case "LE":
-                        mark = znak.LE;
+                        mark = TrainType.LE;
                         break;
                     case "EN":
-                        mark = znak.EN;
+                        mark = TrainType.EN;
                         break;
                     case "RJ":
-                        mark = znak.RJ;
+                        mark = TrainType.RJ;
                         break;
                     case "Mv":
-                        mark = znak.Mv;
+                        mark = TrainType.Mv;
                         break;
                     case "Rx":
-                        mark = znak.Rx;
+                        mark = TrainType.Rx;
                         break;
                 }
                 #endregion
@@ -227,9 +229,9 @@ namespace Tabula
         public NadrazniTabule(Vlak vstupnivlacek)
         {
             vlacek = vstupnivlacek;
-            new System.Threading.Thread(asyncPres).Start();
-            new System.Threading.Thread(asyncHodiny).Start();
-            new System.Threading.Thread(asyncZpozdeni).Start();
+            new System.Threading.Thread(asyncPres) { IsBackground = true }.Start();
+            new System.Threading.Thread(asyncHodiny) { IsBackground = true }.Start();
+            new System.Threading.Thread(asyncZpozdeni) { IsBackground = true }.Start();
             Inicializace();
         }
         public NadrazniTabule(Label druhVlaku, Label cestaVlaku, Label konecVlaku, Label cas, Label odjezdVlaku, Label zpozdeniVlaku, Label cisloVlaku, Image obrazecek, Vlak vstupnivlacek)
@@ -247,9 +249,9 @@ namespace Tabula
         }
         private void Inicializace()
         {
-            asyncP = new System.Threading.Thread(asyncPres);
-            asyncH = new System.Threading.Thread(asyncHodiny);
-            asyncZ = new System.Threading.Thread(asyncZpozdeni);
+            asyncP = new System.Threading.Thread(asyncPres) { IsBackground = true };
+            asyncH = new System.Threading.Thread(asyncHodiny) { IsBackground = true };
+            asyncZ = new System.Threading.Thread(asyncZpozdeni) { IsBackground = true };
             asyncP.Start();
             asyncH.Start();
             asyncZ.Start();
@@ -259,11 +261,11 @@ namespace Tabula
             string temp1 = vlacek.cas.ToString().Substring(2, 2);
             odjezdVlacku.Content = temp2 + ":" + temp1;
             zpozdeniVlacku.Content = vlacek.zpozdeni;
-            if (vlacek.druh == znak.Os)
+            if (vlacek.druh == TrainType.Os)
             {
                 svetlo.Visibility = Visibility.Visible;
             }
-            if (vlacek.druh == znak.IC || vlacek.druh == znak.SC || vlacek.druh == znak.EC || vlacek.druh == znak.EN)
+            if (vlacek.druh == TrainType.IC || vlacek.druh == TrainType.SC || vlacek.druh == TrainType.EC || vlacek.druh == TrainType.EN)
             {
                 druhVlacku.FontStyle = FontStyles.Italic;
             }
@@ -274,14 +276,14 @@ namespace Tabula
             if (vlacek.cilVlaku.Length > 10)
             {
                 konecVlacku.Content = vlacek.cilVlaku.ToUpper();
-                asyncC = new System.Threading.Thread(asyncCil);
+                asyncC = new System.Threading.Thread(asyncCil) { IsBackground = true };
                 asyncC.Start();
             }
             else
             {
                 konecVlacku.Content = vlacek.cilVlaku.ToUpper();
             }
-            new System.Threading.Thread(asyncHlaseni).Start();
+            new System.Threading.Thread(asyncHlaseni) { IsBackground = true }.Start();
         }
         public void asyncHlaseni()
         {
@@ -404,7 +406,7 @@ namespace Tabula
         public class Hlasit
         {
             NadrazniTabule aktual;
-            SoundEngine_ToiletFire sf = new SoundEngine_ToiletFire(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\databanka\\");
+            ToiletFire sf = new ToiletFire(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\databanka\\");
             public Hlasit(NadrazniTabule aktualniTabule)
             {
                 aktual = aktualniTabule;
@@ -423,14 +425,14 @@ namespace Tabula
                 }
                 sf.PlayStationSong(aktual.vlacek.jizda.AktualniPoloha());
                 sf.PlayStationName(aktual.vlacek.jizda.AktualniPoloha());
-                sf.PlayAddS(hlasky.vazeniCestujici);
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
                 if (aktual.vlacek.jizda.aktualniZastavka != 0)
                 {
-                    sf.PlayAddS(hlasky.zeSmeru);
+                    sf.PlayAddS(KnownMessages.zeSmeru);
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.AktualniPoloha())
@@ -440,13 +442,13 @@ namespace Tabula
                         sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                     }
                 }
-                sf.PlayAddS(hlasky.prijedeKNastupisti);
+                sf.PlayAddS(KnownMessages.prijedeKNastupisti);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
                 if (aktual.vlacek.jizda.AktualniPoloha() != aktual.vlacek.cilVlaku)
                 {
-                    sf.PlayAddS(hlasky.budePokracovatVeSmeru);
+                    sf.PlayAddS(KnownMessages.budePokracovatVeSmeru);
                     bool temp = false;
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
@@ -463,7 +465,7 @@ namespace Tabula
                                 {
                                     if (index != 0)
                                     {
-                                        sf.PlayAddS(hlasky.a);
+                                        sf.PlayAddS(KnownMessages.a);
                                     }
                                     sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                                 }
@@ -475,7 +477,7 @@ namespace Tabula
                             }
                         }
                     }
-                    sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                    sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                     sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu); 
                 }
                 sf.PlayStationSong("instant");
@@ -488,16 +490,16 @@ namespace Tabula
                 }
                 sf.PlayStationSong(aktual.vlacek.jizda.AktualniPoloha());
                 sf.PlayStationName(aktual.vlacek.jizda.AktualniPoloha());
-                sf.PlayAddS(hlasky.vazeniCestujici);
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
                 if (spozdeny)
-                    sf.PlayAddS(hlasky.zpozdeny);
+                    sf.PlayAddS(KnownMessages.zpozdeny);
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
                 if (aktual.vlacek.jizda.aktualniZastavka != 0)
                 {
-                    sf.PlayAddS(hlasky.zeSmeru);
+                    sf.PlayAddS(KnownMessages.zeSmeru);
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.AktualniPoloha())
@@ -507,13 +509,13 @@ namespace Tabula
                         sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                     }
                 }
-                sf.PlayAddS(hlasky.prijedeKNastupisti);
+                sf.PlayAddS(KnownMessages.prijedeKNastupisti);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
                 if (aktual.vlacek.jizda.AktualniPoloha() != aktual.vlacek.cilVlaku)
                 {
-                    sf.PlayAddS(hlasky.budePokracovatVeSmeru);
+                    sf.PlayAddS(KnownMessages.budePokracovatVeSmeru);
                     bool temp = false;
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
@@ -530,7 +532,7 @@ namespace Tabula
                                 {
                                     if (index != 0)
                                     {
-                                        sf.PlayAddS(hlasky.a);
+                                        sf.PlayAddS(KnownMessages.a);
                                     }
                                     sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                                 }
@@ -542,7 +544,7 @@ namespace Tabula
                             }
                         }
                     }
-                    sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                    sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                     sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu); 
                 }
                 sf.PlayStationSong("instant");
@@ -551,14 +553,14 @@ namespace Tabula
             {
                 sf.PlayStationSong(aktual.vlacek.jizda.AktualniPoloha());
                 sf.PlayStationName(aktual.vlacek.jizda.AktualniPoloha());
-                sf.PlayAddS(hlasky.vazeniCestujici);
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
                 if (aktual.vlacek.jizda.aktualniZastavka != 0)
                 {
-                    sf.PlayAddS(hlasky.zeSmeru);
+                    sf.PlayAddS(KnownMessages.zeSmeru);
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.AktualniPoloha())
@@ -568,13 +570,13 @@ namespace Tabula
                         sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                     } 
                 }
-                sf.PlayAddS(hlasky.prijelKNastupisti);
+                sf.PlayAddS(KnownMessages.prijelKNastupisti);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
                 if (aktual.vlacek.jizda.AktualniPoloha() != aktual.vlacek.cilVlaku)
                 {
-                    sf.PlayAddS(hlasky.budePokracovatVeSmeru);
+                    sf.PlayAddS(KnownMessages.budePokracovatVeSmeru);
                     bool temp = false;
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
@@ -591,7 +593,7 @@ namespace Tabula
                                 {
                                     if (index != 0)
                                     {
-                                        sf.PlayAddS(hlasky.a);
+                                        sf.PlayAddS(KnownMessages.a);
                                     }
                                     sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                                 }
@@ -603,7 +605,7 @@ namespace Tabula
                             }
                         }
                     }
-                    sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                    sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                     sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu); 
                 }
                 sf.PlayStationSong("instant");
@@ -612,16 +614,16 @@ namespace Tabula
             {
                 sf.PlayStationSong(aktual.vlacek.jizda.AktualniPoloha());
                 sf.PlayStationName(aktual.vlacek.jizda.AktualniPoloha());
-                sf.PlayAddS(hlasky.vazeniCestujici);
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
                 if (spozdeny)
-                    sf.PlayAddS(hlasky.zpozdeny);
+                    sf.PlayAddS(KnownMessages.zpozdeny);
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
                 if (aktual.vlacek.jizda.aktualniZastavka != 0)
                 {
-                    sf.PlayAddS(hlasky.zeSmeru);
+                    sf.PlayAddS(KnownMessages.zeSmeru);
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.AktualniPoloha())
@@ -631,13 +633,13 @@ namespace Tabula
                         sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                     }
                 }
-                sf.PlayAddS(hlasky.prijelKNastupisti);
+                sf.PlayAddS(KnownMessages.prijelKNastupisti);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
                 if (aktual.vlacek.jizda.AktualniPoloha() != aktual.vlacek.cilVlaku)
                 {
-                    sf.PlayAddS(hlasky.budePokracovatVeSmeru);
+                    sf.PlayAddS(KnownMessages.budePokracovatVeSmeru);
                     bool temp = false;
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
@@ -654,7 +656,7 @@ namespace Tabula
                                 {
                                     if (index != 0)
                                     {
-                                        sf.PlayAddS(hlasky.a);
+                                        sf.PlayAddS(KnownMessages.a);
                                     }
                                     sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                                 }
@@ -666,7 +668,7 @@ namespace Tabula
                             }
                         }
                     }
-                    sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                    sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                     sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu); 
                 }
                 sf.PlayStationSong("instant");
@@ -675,17 +677,17 @@ namespace Tabula
             {
                 sf.PlayStationSong(aktual.vlacek.jizda.AktualniPoloha());
                 sf.PlayStationName(aktual.vlacek.jizda.AktualniPoloha());
-                sf.PlayAddS(hlasky.vazeniCestujici);
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
                 if (spozdeny)
-                    sf.PlayAddS(hlasky.zpozdeny);
+                    sf.PlayAddS(KnownMessages.zpozdeny);
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
-                sf.PlayAddS(hlasky.zeSmeru);
+                sf.PlayAddS(KnownMessages.zeSmeru);
                 if (aktual.vlacek.jizda.aktualniZastavka != 0)
                 {
-                    sf.PlayAddS(hlasky.zeSmeru);
+                    sf.PlayAddS(KnownMessages.zeSmeru);
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.AktualniPoloha())
@@ -695,13 +697,13 @@ namespace Tabula
                         sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                     }
                 }
-                sf.PlayAddS(hlasky.prijelKNastupisti);
+                sf.PlayAddS(KnownMessages.prijelKNastupisti);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
                 if (aktual.vlacek.jizda.AktualniPoloha() != aktual.vlacek.cilVlaku)
                 {
-                    sf.PlayAddS(hlasky.budePokracovatVeSmeru);
+                    sf.PlayAddS(KnownMessages.budePokracovatVeSmeru);
                     bool temp = false;
                     for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                     {
@@ -718,7 +720,7 @@ namespace Tabula
                                 {
                                     if (index != 0)
                                     {
-                                        sf.PlayAddS(hlasky.a);
+                                        sf.PlayAddS(KnownMessages.a);
                                     }
                                     sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                                 }
@@ -730,27 +732,27 @@ namespace Tabula
                             }
                         }
                     }
-                    sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                    sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                     sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu);
                     if (hlasitUkoncitNastup)
-                        sf.PlayAddS(hlasky.ukonceteNastupOdjezdVlaku); 
+                        sf.PlayAddS(KnownMessages.ukonceteNastupOdjezdVlaku); 
                 }
                 sf.PlayStationSong("instant");
             }
             public void UkonceteNastup()
             {
                 throw new NotImplementedException();
-                sf.PlayAddS(hlasky.vazeniCestujici);
-                //sf.PlayAddS(hlasky) NA NASTUPISTI!!! - DOKOPAT ZADARMA
+                sf.PlayAddS(KnownMessages.vazeniCestujici);
+                //sf.PlayAddS(KnownMessages) NA NASTUPISTI!!! - DOKOPAT ZADARMA
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.nastupisteVlaku));
-                sf.PlayAddS(hlasky.kolej);
+                sf.PlayAddS(KnownMessages.kolej);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.kolejVlaku));
-                //sf.PlayAddS(hlasky) UKONCETE NASTUP DO !!! - DOKOPAT ZADARMA
+                //sf.PlayAddS(KnownMessages) UKONCETE NASTUP DO !!! - DOKOPAT ZADARMA
                 sf.ReadCategory(aktual.vlacek.druh);
                 sf.ReadNumber(Convert.ToInt32(aktual.vlacek.cislo));
                 sf.ReadTrainName(aktual.vlacek.nazevVlaku);
                 sf.ReadCompany(aktual.vlacek.firma);
-                //sf.PlayAddS(hlasky) VE SMERU !!! - DOKOPAT ZADARMA
+                //sf.PlayAddS(KnownMessages) VE SMERU !!! - DOKOPAT ZADARMA
                 bool temp = false;
                 for (int i = 0; i < aktual.vlacek.jizda.trasa.Length; i++)
                 {
@@ -762,7 +764,7 @@ namespace Tabula
                     {
                         if (aktual.vlacek.jizda.trasa[i] == aktual.vlacek.jizda.trasa[aktual.vlacek.jizda.trasa.Length - 1])
                         {
-                            sf.PlayAddS(hlasky.a);
+                            sf.PlayAddS(KnownMessages.a);
                             sf.PlayStationName(aktual.vlacek.jizda.trasa[i]);
                         }
                         else
@@ -771,9 +773,9 @@ namespace Tabula
                         }
                     }
                 }
-                sf.PlayAddS(hlasky.pravidelnyOdjezd);
+                sf.PlayAddS(KnownMessages.pravidelnyOdjezd);
                 sf.ReadTime(aktual.vlacek.jizda.casy[aktual.vlacek.AktualniPoloha()].casOdjezdu);
-                sf.PlayAddS(hlasky.ukonceteNastupOdjezdVlaku);
+                sf.PlayAddS(KnownMessages.ukonceteNastupOdjezdVlaku);
                 sf.PlayStationSong("instant");
             }
             public void Spozdeni()
@@ -786,7 +788,7 @@ namespace Tabula
     public class Vlak
     {
         public string cislo { get; private set; }
-        public znak druh { get; private set; }
+        public TrainType druh { get; private set; }
         public JizdniRad jizda { get; private set; }
         public int zpozdeni = 0;
         public string kolejVlaku { get; set; }
@@ -794,9 +796,9 @@ namespace Tabula
         public string cas;
         public string cilVlaku;
         private bool jede = false;
-        public spolecnost firma { get; private set; }
+        public Company firma { get; private set; }
         public string nazevVlaku { get; private set; }
-        public Vlak(string cisloVlaku, znak typ, JizdniRad cesta, string kolej, string nastupiste, spolecnost drazniFirma, string aktualniStanice, string nazev)
+        public Vlak(string cisloVlaku, TrainType typ, JizdniRad cesta, string kolej, string nastupiste, Company drazniFirma, string aktualniStanice, string nazev)
         {
             cislo = cisloVlaku;
             druh = typ;
@@ -885,406 +887,5 @@ namespace Tabula
             casOdjezdu = casO;
         }
     }
-    public class SoundEngine_ToiletFire
-    {
-        string appPath;
-        SoundEngine_ToiletFire_NumbersEngine numb;
-        SoundEngine_ToiletFire_Category ct;
-        SoundEngine_ToiletFire_Company co;
-        SoundEngine_ToiletFire_AdditionalsSounds ass;
-        SoundEngine_ToiletFire_StationName st;
-        SoundEngine_ToiletFire_StationSounds ss;
-        SoundEngine_ToiletFire_TrainName tn;
-        public SoundEngine_ToiletFire(string applicationPath)
-        {
-            appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.tabula/databanka";
-            numb = new SoundEngine_ToiletFire_NumbersEngine(appPath);
-            ct = new SoundEngine_ToiletFire_Category(appPath);
-            co = new SoundEngine_ToiletFire_Company(appPath);
-            ss = new SoundEngine_ToiletFire_StationSounds(appPath);
-            tn = new SoundEngine_ToiletFire_TrainName(appPath);
-            ass = new SoundEngine_ToiletFire_AdditionalsSounds(appPath);
-            st = new SoundEngine_ToiletFire_StationName(appPath);
-        }
-        public void ReadNumber(int number)
-        {
-            foreach (var item in numb.GetSoundOfNumber(number))
-            {
-                item.PlaySync();
-            }
-        }
-        public void ReadCategory(znak typVlaku)
-        {
-            ct.GetSoundsOfCategory(typVlaku);
-        }
-        public void ReadCompany(spolecnost Spolecnost)
-        {
-            co.GetSoundsOfCompany(Spolecnost);
-        }
-        public void PlayStationSong(string aktualniStanice)
-        {
-            ss.GetSoundOfStationSounds(aktualniStanice);
-        }
-        public void ReadTrainName(string nazevVlaku)
-        {
-            tn.GetSoundOfTrainName(nazevVlaku);
-        }
-        public void PlayAddS(hlasky hlaska)
-        {
-            ass.GetSoundOfAdditionalSounds(hlaska);
-        }
-        public void PlayStationName(string nazevStanice, bool playDef = false)
-        {
-            if (playDef)
-            {
-                st.GetSoundOfStationName("DEF"); 
-            }
-            st.GetSoundOfStationName(nazevStanice);
-        }
-        public void ReadTime(string time)
-        {
-            ReadNumber(Convert.ToInt32(time.Substring(0, 2)));
-            PlayAddS(hlasky.hodin);
-            ReadNumber(Convert.ToInt32(time.Substring(2, 2)));
-            PlayAddS(hlasky.minut);
-        }
-        public class SoundEngine_ToiletFire_NumbersEngine
-        {
-            Dictionary<Int32, SoundPlayer> cisla;
-            public SoundEngine_ToiletFire_NumbersEngine(string appPath)
-            {
-                cisla = new Dictionary<int, SoundPlayer>();
-                foreach (string item in Directory.GetFiles(Path.Combine(appPath, "cisla")))
-                {
-                    cisla.Add(Convert.ToInt32(item.Substring(item.IndexOf("cisla") + 6, item.Length - 4 - (item.IndexOf("cisla") + 6))), new SoundPlayer(item));
-                    cisla[Convert.ToInt32(item.Substring((item.IndexOf("cisla") + 6), item.Length - (item.IndexOf("cisla") + 6) - 4))].LoadAsync();
-                }
-                var keys = cisla.Keys.ToArray<int>();
-                keys = (from item in keys orderby item select item).ToArray<int>();
-                var dict = new Dictionary<int, SoundPlayer>();
-                foreach (int item in keys)
-                    dict.Add(item, cisla[item]);
-                cisla = dict;
-            }
-            public Queue<SoundPlayer> GetSoundOfNumber(Int32 number)
-            {
-                Queue<SoundPlayer> returnQueue = new Queue<SoundPlayer>();
-                var reversedKeys = cisla.Keys.ToArray();
-                Array.Reverse(reversedKeys);
-                if (number.ToString().Length < 4)
-                {
-                    number++;
-                    foreach (var item in reversedKeys)
-                    {
-                        if (number - item > 0)
-                        {
-                            returnQueue.Enqueue(cisla[item]);
-                            number -= item;
-                        }
-                    }
-                    var arr = new SoundPlayer[returnQueue.Count - 1];
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        arr[i] = returnQueue.Dequeue();
-                    }
-                    returnQueue.Clear();
-                    foreach (SoundPlayer player in arr)
-                        returnQueue.Enqueue(player);
-                }
-                else if (number.ToString().Length == 4)
-                {
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(0, 2))))
-                        returnQueue.Enqueue(player);
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(2, 2))))
-                        returnQueue.Enqueue(player);
-                }
-                else if (number.ToString().Length == 5)
-                {
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(0, 2))))
-                        returnQueue.Enqueue(player);
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(2, 3))))
-                        returnQueue.Enqueue(player);
-                }
-                else if (number.ToString().Length == 6)
-                {
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(0, 3))))
-                        returnQueue.Enqueue(player);
-                    foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(3, 3))))
-                        returnQueue.Enqueue(player);
-                }
-                else if (number.ToString().Length > 6)
-                {
-                    for (int i = 0; i < number.ToString().Length; i++)
-                    {
-                        foreach (SoundPlayer player in GetSoundOfNumber(Convert.ToInt32(number.ToString().Substring(i, 1))))
-                            returnQueue.Enqueue(player);
-                    }
-                }
-                return returnQueue;
-            }
-        }
-        public class SoundEngine_ToiletFire_Category
-        {
-            Dictionary<znak, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_Category(string appPath)
-            {
-                appPath = appPath + "\\typ\\";
-                databaze = new Dictionary<znak, SoundPlayer>();
-                foreach (string item in Directory.GetFiles(appPath))
-                {
-                    znak mark = znak.Os;
-                    #region Chuj Switch
-                    switch (item.Substring(item.IndexOf("typ") + 4, item.Length - (item.IndexOf("typ") + 4)))
-                    {
-                        case "Os.wav":
-                            mark = znak.Os;
-                            break;
-                        case "Sp.wav":
-                            mark = znak.Sp;
-                            break;
-                        case "R.wav":
-                            mark = znak.R;
-                            break;
-                        case "Ex.wav":
-                            mark = znak.Ex;
-                            break;
-                        case "IC.wav":
-                            mark = znak.IC;
-                            break;
-                        case "EC.wav":
-                            mark = znak.EC;
-                            break;
-                        case "SC.wav":
-                            mark = znak.SC;
-                            break;
-                        case "LE.wav":
-                            mark = znak.LE;
-                            break;
-                        case "EN.wav":
-                            mark = znak.EN;
-                            break;
-                        case "RJ.wav":
-                            mark = znak.RJ;
-                            break;
-                        case "Mv.wav":
-                            mark = znak.Mv;
-                            break;
-                        case "Rx.wav":
-                            mark = znak.Rx;
-                            break;
-                    }
-                    #endregion/
-                    databaze.Add(mark, new SoundPlayer(item));
-                    foreach (var item2 in databaze)
-                    {
-                        item2.Value.LoadAsync();
-                    }
-                }
-            }
-            public void GetSoundsOfCategory(znak druhVlaku)
-            {
-                databaze[druhVlaku].PlaySync();
-            }
-        }
-        public class SoundEngine_ToiletFire_Company
-        {
-            Dictionary<spolecnost, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_Company(string appPath)
-            {
-                databaze = new Dictionary<spolecnost, SoundPlayer>();
-                appPath = appPath + "\\spolecnost\\";
-                foreach (string item in Directory.GetFiles(appPath))
-                {
-                    spolecnost mark = spolecnost.CD;
-                    #region Chuj Switch
-                    switch (item.Substring(item.IndexOf("spolecnost") + 11, item.Length - (item.IndexOf("spolecnost") + 11)))
-                    {
-                        case "CD.wav":
-                            mark = spolecnost.CD;
-                            break;
-                        case "LE.wav":
-                            mark = spolecnost.LE;
-                            break;
-                        case "RJ.wav":
-                            mark = spolecnost.RJ;
-                            break;
-                    }
-                    #endregion
-                    databaze.Add(mark, new SoundPlayer(item));
-                    foreach (var item2 in databaze)
-                    {
-                        item2.Value.LoadAsync();
-                    }
-                }
-            }
-            public void GetSoundsOfCompany(spolecnost Spolecnost)
-            {
-                databaze[Spolecnost].PlaySync();
-            }
-        }
-        public class SoundEngine_ToiletFire_StationSounds
-        {
-            Dictionary<string, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_StationSounds(string appPath)
-            {
-                databaze = new Dictionary<string, SoundPlayer>();
-                foreach (string item in Directory.GetFiles(appPath + "\\znelky\\"))
-                {
-                    databaze.Add(item.Substring(item.IndexOf("znelky") + 7, item.Length - 4 - (item.IndexOf("znelky") + 7)), new SoundPlayer(item));
-                    databaze[item.Substring((item.IndexOf("znelky") + 7), item.Length - (item.IndexOf("znelky") + 7) - 4)].LoadAsync();
-                }
-                var keys = databaze.Keys.ToArray<string>();
-                keys = (from item in keys orderby item select item).ToArray<string>();
-                var dict = new Dictionary<string, SoundPlayer>();
-                foreach (string item in keys)
-                    dict.Add(item, databaze[item]);
-                databaze = dict;
-            }
-            public void GetSoundOfStationSounds(string aktualniStanice)
-            {
-                SoundPlayer prehravac = new SoundPlayer();
-                databaze.TryGetValue(aktualniStanice, out prehravac);
-                if (prehravac == default(SoundPlayer))
-                    databaze["default"].PlaySync();
-                else
-                    prehravac.PlaySync();
-            }
-        }
-        public class SoundEngine_ToiletFire_StationName
-        {
-            Dictionary<string, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_StationName(string appPath)
-            {
-                databaze = new Dictionary<string, SoundPlayer>();
-                foreach (string item in Directory.GetFiles(appPath + "\\stanice\\"))
-                {
-                    databaze.Add(item.Substring(item.IndexOf("stanice") + 8, item.Length - 4 - (item.IndexOf("stanice") + 8)), new SoundPlayer(item));
-                    databaze[item.Substring((item.IndexOf("stanice") + 8), item.Length - (item.IndexOf("stanice") + 8) - 4)].LoadAsync();
-                }
-                var keys = databaze.Keys.ToArray<string>();
-                keys = (from item in keys orderby item select item).ToArray<string>();
-                var dict = new Dictionary<string, SoundPlayer>();
-                foreach (string item in keys)
-                    dict.Add(item, databaze[item]);
-                databaze = dict;
-            }
-            public void GetSoundOfStationName(string stanice)
-            {
-                SoundPlayer prehravac = new SoundPlayer();
-                databaze.TryGetValue(stanice, out prehravac);
-                if (prehravac == default(SoundPlayer))
-                    databaze["default"].PlaySync();
-                else
-                    prehravac.PlaySync();
-            }
-        }
-        public class SoundEngine_ToiletFire_TrainName
-        {
-            Dictionary<string, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_TrainName(string appPath)
-            {
-                databaze = new Dictionary<string, SoundPlayer>();
-                foreach (string item in Directory.GetFiles(appPath + "\\nazev\\"))
-                {
-                    databaze.Add(item.Substring(item.IndexOf("nazev") + 6, item.Length - 4 - (item.IndexOf("nazev") + 6)), new SoundPlayer(item));
-                    databaze[item.Substring((item.IndexOf("nazev") + 6), item.Length - (item.IndexOf("nazev") + 6) - 4)].LoadAsync();
-                }
-                var keys = databaze.Keys.ToArray<string>();
-                keys = (from item in keys orderby item select item).ToArray<string>();
-                var dict = new Dictionary<string, SoundPlayer>();
-                foreach (string item in keys)
-                    dict.Add(item, databaze[item]);
-                databaze = dict;
-            }
-            public void GetSoundOfTrainName(string nazev)
-            {
-                if (string.IsNullOrEmpty(nazev) || string.IsNullOrWhiteSpace(nazev))
-                    return;
-                SoundPlayer prehravac = new SoundPlayer();
-                databaze.TryGetValue(nazev, out prehravac);
-                if (prehravac == default(SoundPlayer))
-                    databaze["default"].PlaySync();
-                else
-                    prehravac.PlaySync();
-            }
-        }
-        public class SoundEngine_ToiletFire_AdditionalsSounds
-        {
-            Dictionary<hlasky, SoundPlayer> databaze;
-            public SoundEngine_ToiletFire_AdditionalsSounds(string appPath)
-            {
-                databaze = new Dictionary<hlasky, SoundPlayer>();
-                appPath = appPath + "\\mezi\\";
-                foreach (string item in Directory.GetFiles(appPath))
-                {
-                    hlasky mark = hlasky.vazeniCestujici;
-                    #region Chuj Switch
-                    switch (item.Substring(item.IndexOf("mezi") + 5, item.Length - (item.IndexOf("mezi") + 5)))
-                    {
-                        case "a.wav":
-                            mark = hlasky.a;
-                            break;
-                        case "budepokracovat.wav":
-                            mark = hlasky.budePokracovatVeSmeru;
-                            break;
-                        case "hodin.wav":
-                            mark = hlasky.hodin;
-                            break;
-                        case "kolej.wav":
-                            mark = hlasky.kolej;
-                            break;
-                        case "minut.wav":
-                            mark = hlasky.minut;
-                            break;
-                        case "omluva.wav":
-                            mark = hlasky.omluvaZaZpozdeni;
-                            break;
-                        case "pravidelny.wav":
-                            mark = hlasky.pravidelnyOdjezd;
-                            break;
-                        case "prijede.wav":
-                            mark = hlasky.prijedeKNastupisti;
-                            break;
-                        case "prijel.wav":
-                            mark = hlasky.prijelKNastupisti;
-                            break;
-                        case "ukoncete.wav":
-                            mark = hlasky.ukonceteNastupOdjezdVlaku;
-                            break;
-                        case "vazenicestujici.wav":
-                            mark = hlasky.vazeniCestujici;
-                            break;
-                        case "zesmeru.wav":
-                            mark = hlasky.zeSmeru;
-                            break;
-                        case "zpozdeny.wav":
-                            mark = hlasky.zpozdeny;
-                            break;
-                    }
-                    #endregion
-                    databaze.Add(mark, new SoundPlayer(item));
-                    foreach (var item2 in databaze)
-                    {
-                        item2.Value.LoadAsync();
-                    }
-                }
-            }
-            public void GetSoundOfAdditionalSounds(hlasky hlaska)
-            {
-                databaze[hlaska].PlaySync();
-            }
-        }
-    }
-    public enum znak
-    {
-        Os, Sp, R, Ex, IC, EC, SC, LE, EN, RJ, Mv, Rx
-    };
-    public enum spolecnost
-    {
-        CD, RJ, LE
-    };
-    public enum hlasky
-    {
-        a, budePokracovatVeSmeru, hodin, kolej, minut, omluvaZaZpozdeni, pravidelnyOdjezd, prijedeKNastupisti, prijelKNastupisti, ukonceteNastupOdjezdVlaku, vazeniCestujici, zeSmeru, zpozdeny
-    };
+
 }
